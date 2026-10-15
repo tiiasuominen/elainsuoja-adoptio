@@ -1,14 +1,36 @@
 const express = require('express');
+const { Pool } = require('pg');
+
 const app = express();
+const pool = new Pool({
+  host: 'localhost',
+  port: 5433,
+  user: 'shelter',
+  password: 'shelter',
+  database: 'shelter',
+});
 
-const animals = [
-  { id: 1, name: 'Munis', type: 'kissa', age: 7 },
-  { id: 2, name: 'Minttu', type: 'koira', age: 13 },
-  { id: 3, name: 'Vikke', type: 'koira', age: 5 },
-];
+app.get('/animals', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT * FROM animals ORDER BY id');
+    res.json(result.rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Tietokantavirhe' });
+  }
+});
 
-app.get('/animals', (req, res) => {
-  res.json(animals);
+app.get('/animals/:id', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT * FROM animals WHERE id = $1', [req.params.id]);
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Eläintä ei löytynyt' });
+    }
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Tietokantavirhe' });
+  }
 });
 
 app.listen(3000, () => {
