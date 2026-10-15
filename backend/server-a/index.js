@@ -3,8 +3,8 @@ const { Pool } = require('pg');
 
 const app = express();
 const pool = new Pool({
-  host: 'localhost',
-  port: 5433,
+  host: process.env.DB_HOST || 'localhost',
+  port: process.env.DB_PORT || 5433,
   user: 'shelter',
   password: 'shelter',
   database: 'shelter',
